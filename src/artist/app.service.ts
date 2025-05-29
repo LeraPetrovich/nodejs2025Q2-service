@@ -27,10 +27,10 @@ export class AppService {
     if (!artist) {
       return;
     }
-    if (artistBody.name) {
+    if ('name' in artistBody) {
       artist.name = artistBody.name;
     }
-    if (typeof artistBody.grammy === 'boolean') {
+    if ('grammy' in artistBody) {
       artist.grammy = artistBody.grammy;
     }
     return artist;

@@ -28,13 +28,13 @@ export class AppService {
     if (!album) {
       return;
     }
-    if (newData.name !== undefined) {
+    if ('name' in newData) {
       album.name = newData.name;
     }
-    if (newData.year !== undefined) {
+    if ('yeat' in newData) {
       album.year = newData.year;
     }
-    if (newData.artistId !== undefined) {
+    if ('artistId' in newData) {
       album.artistId = newData.artistId;
     }
 

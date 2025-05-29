@@ -28,24 +28,25 @@ export class AppService {
     const track = tracks.find((item) => item.id === id);
     if (!track) return;
 
-    if (newTrack.name !== undefined) {
+    if ('name' in newTrack) {
       track.name = newTrack.name;
     }
 
-    if (newTrack.duration !== undefined) {
+    if ('duration' in newTrack) {
       track.duration = newTrack.duration;
     }
 
-    if (newTrack.albumId !== undefined) {
+    if ('albumId' in newTrack) {
       track.albumId = newTrack.albumId;
     }
 
-    if (newTrack.artistId !== undefined) {
+    if ('artistId' in newTrack) {
       track.artistId = newTrack.artistId;
     }
 
     return track;
   }
+  
   deleteTrack(id: string) {
     const index = tracks.findIndex((item) => item.id === id);
     if (index === -1) {
