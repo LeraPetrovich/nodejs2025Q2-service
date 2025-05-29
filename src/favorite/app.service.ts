@@ -5,6 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
   UnprocessableEntityException,
+  ConflictException,
 } from '@nestjs/common';
 import { validate as isUUID } from 'uuid';
 import { getFavorites } from './utils/getFavorites';
@@ -24,9 +25,11 @@ export class AppService {
     if (!currentTrack) {
       throw new UnprocessableEntityException('Track not found');
     }
-    if (!favorites.tracks.some((track) => track === id)) {
-      favorites.tracks.push(currentTrack.id);
+    if (favorites.tracks.some((track) => track === id)) {
+      throw new ConflictException('Track is already in favorites');
     }
+
+    favorites.tracks.push(currentTrack.id);
 
     return { message: 'Track added to favorites' };
   }
@@ -52,9 +55,10 @@ export class AppService {
     if (!currentAlbum) {
       throw new UnprocessableEntityException('Album not found');
     }
-    if (!favorites.albums.some((item) => item === id)) {
-      favorites.albums.push(currentAlbum.id);
+    if (favorites.albums.some((item) => item === id)) {
+      throw new ConflictException('Albums is already in favorites');
     }
+    favorites.albums.push(currentAlbum.id);
 
     return { message: 'Album added to favorites' };
   }
@@ -81,9 +85,11 @@ export class AppService {
     if (!currentArtist) {
       throw new UnprocessableEntityException('Artist not found');
     }
-    if (!favorites.artists.some((item) => item === id)) {
-      favorites.artists.push(currentArtist.id);
+    if (favorites.artists.some((item) => item === id)) {
+      throw new ConflictException('Artists is already in favorites');
     }
+
+    favorites.artists.push(currentArtist.id);
 
     return { message: 'Album added to favorites' };
   }
