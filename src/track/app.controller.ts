@@ -28,7 +28,7 @@ export class AppController {
 
   @Get(':id')
   @HttpCode(200)
-  getUser(@Param('id') id: string): Track {
+  getTrack(@Param('id') id: string): Track {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
@@ -47,7 +47,7 @@ export class AppController {
 
   @Put(':id')
   @HttpCode(200)
-  updateUserPassword(
+  updateTrack(
     @Param('id') id: string,
     @Body() createTrackTo: CreateTrack,
   ): Track {
@@ -65,7 +65,7 @@ export class AppController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteUser(@Param('id') id: string) {
+  deleteTrack(@Param('id') id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
