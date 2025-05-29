@@ -3,7 +3,7 @@ import type { Artist } from 'src/db/types';
 import { artists } from 'src/db/db';
 import { CreateArtistTo } from 'src/validate/CreateNewArtist';
 import { v4 as uuidv4 } from 'uuid';
-
+import { deleteArtistUtils } from './utils/deleteArtist';
 @Injectable()
 export class AppService {
   getArtists(): Artist[] {
@@ -36,11 +36,6 @@ export class AppService {
     return artist;
   }
   deleteArtist(id: string) {
-    const index = artists.findIndex((item) => item.id === id);
-    if (index === -1) {
-      return;
-    }
-    const [deleteArtist] = artists.splice(index, 1);
-    return deleteArtist;
+    return deleteArtistUtils(id);
   }
 }

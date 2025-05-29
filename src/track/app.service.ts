@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { tracks } from 'src/db/db';
 import type { Track } from 'src/db/types';
 import { CreateTrack } from 'src/validate/CreateTrack';
-import { v4 as uuidv4 } from 'uuid';
+import { createTrackUtils } from './utils/createTrack';
+import { updateTrackUtils } from './utils/updateTrack';
 
 @Injectable()
 export class AppService {
@@ -13,40 +14,12 @@ export class AppService {
     return tracks.find((item) => item.id === id);
   }
   createTrack(track: CreateTrack) {
-    const id = uuidv4();
-    const newTrack = {
-      id,
-      name: track.name,
-      artistId: track.artistId || null,
-      albumId: track.albumId || null,
-      duration: track.duration,
-    };
-    tracks.push(newTrack);
-    return newTrack;
+    return createTrackUtils(track);
   }
   updateTrack(id: string, newTrack: CreateTrack): Track | undefined {
-    const track = tracks.find((item) => item.id === id);
-    if (!track) return;
-
-    if ('name' in newTrack) {
-      track.name = newTrack.name;
-    }
-
-    if ('duration' in newTrack) {
-      track.duration = newTrack.duration;
-    }
-
-    if ('albumId' in newTrack) {
-      track.albumId = newTrack.albumId;
-    }
-
-    if ('artistId' in newTrack) {
-      track.artistId = newTrack.artistId;
-    }
-
-    return track;
+    return updateTrackUtils(id, newTrack);
   }
-  
+
   deleteTrack(id: string) {
     const index = tracks.findIndex((item) => item.id === id);
     if (index === -1) {

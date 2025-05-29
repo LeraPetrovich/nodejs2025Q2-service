@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import type { Album } from 'src/db/types';
 import { CreateNewAlbumTo } from 'src/validate/CreateNewAlbum';
 import { albums } from 'src/db/db';
-import { v4 as uuidv4 } from 'uuid';
+import { createAlbumUtils } from './utils/createAlbum';
+import { updateAlbumUtils } from './utils/ubdateAlbum';
+import { deleteAlbumUtils } from './utils/deleteAlbum';
 
 @Injectable()
 export class AppService {
@@ -13,39 +15,12 @@ export class AppService {
     return albums.find((item) => item.id === id);
   }
   createAlbum(newAlbum: CreateNewAlbumTo) {
-    const id = uuidv4();
-    const newData = {
-      id,
-      name: newAlbum.name,
-      year: newAlbum.year,
-      artistId: newAlbum.artistId ?? null,
-    };
-    albums.push(newData);
-    return newData;
+    return createAlbumUtils(newAlbum);
   }
   updateAlbum(id: string, newData: CreateNewAlbumTo) {
-    const album = albums.find((item) => item.id === id);
-    if (!album) {
-      return;
-    }
-    if ('name' in newData) {
-      album.name = newData.name;
-    }
-    if ('yeat' in newData) {
-      album.year = newData.year;
-    }
-    if ('artistId' in newData) {
-      album.artistId = newData.artistId;
-    }
-
-    return album;
+    return updateAlbumUtils(id, newData);
   }
   deleteAlbum(id: string) {
-    const index = albums.findIndex((item) => item.id === id);
-    if (index === -1) {
-      return;
-    }
-    const [deleteAlbum] = albums.splice(index, 1);
-    return deleteAlbum;
+    return deleteAlbumUtils(id);
   }
 }
