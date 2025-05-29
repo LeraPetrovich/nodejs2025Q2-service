@@ -34,4 +34,10 @@ interface Favorites {
   tracks: string[];
 }
 
-export type { User, Artist, Track, Album, Favorites };
+interface FavoritesResponse {
+  artists: Artist[];
+  albums: Album[];
+  tracks: Track[];
+}
+
+export type { User, Artist, Track, Album, Favorites, FavoritesResponse };
