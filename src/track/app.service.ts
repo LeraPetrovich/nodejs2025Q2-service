@@ -4,6 +4,7 @@ import type { Track } from 'src/db/types';
 import { CreateTrack } from 'src/validate/CreateTrack';
 import { createTrackUtils } from './utils/createTrack';
 import { updateTrackUtils } from './utils/updateTrack';
+import { deleteTrack } from './utils/deleteTrack';
 
 @Injectable()
 export class AppService {
@@ -21,12 +22,6 @@ export class AppService {
   }
 
   deleteTrack(id: string) {
-    const index = tracks.findIndex((item) => item.id === id);
-    if (index === -1) {
-      return;
-    }
-
-    const [deleteTrack] = tracks.splice(index, 1);
-    return deleteTrack;
+    return deleteTrack(id);
   }
 }
