@@ -10,7 +10,7 @@ const checkIsValidArtist = (id: string) => {
 export const createAlbumUtils = (newAlbum: CreateNewAlbumTo) => {
   const id = uuidv4();
 
-  if (newAlbum.artistId !== null && !checkIsValidArtist(newAlbum.artistId)) {
+  if (newAlbum.artistId != null && !checkIsValidArtist(newAlbum.artistId)) {
     throw new NotFoundException('Artist not found');
   }
 

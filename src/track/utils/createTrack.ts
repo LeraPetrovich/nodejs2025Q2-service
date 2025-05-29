@@ -14,10 +14,10 @@ const checkIsValidAlbum = (id: string) => {
 export const createTrackUtils = (track: CreateTrack) => {
   const id = uuidv4();
 
-  if (track.albumId !== null && !checkIsValidAlbum(track.albumId)) {
+  if (track.albumId != null && !checkIsValidAlbum(track.albumId)) {
     throw new NotFoundException('Album not found');
   }
-  if (track.artistId !== null && !checkIsValidArtist(track.artistId)) {
+  if (track.artistId != null && !checkIsValidArtist(track.artistId)) {
     throw new NotFoundException('Artist not found');
   }
 

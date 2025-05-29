@@ -18,7 +18,7 @@ export const updateAlbumUtils = (id: string, newData: CreateNewAlbumTo) => {
     album.year = newData.year;
   }
   if ('artistId' in newData) {
-    if (newData.artistId !== null && !checkIsValidArtist(newData.artistId)) {
+    if (newData.artistId != null && !checkIsValidArtist(newData.artistId)) {
       throw new NotFoundException('Artist not found');
     }
     album.artistId = newData.artistId;

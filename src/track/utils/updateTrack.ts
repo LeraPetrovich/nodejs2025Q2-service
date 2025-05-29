@@ -23,14 +23,14 @@ export const updateTrackUtils = (id: string, newTrack: CreateTrack) => {
   }
 
   if ('albumId' in newTrack) {
-    if (newTrack.albumId !== null && !checkIsValidAlbum(newTrack.albumId)) {
+    if (newTrack.albumId != null && !checkIsValidAlbum(newTrack.albumId)) {
       throw new NotFoundException('Album not found');
     }
     track.albumId = newTrack.albumId;
   }
 
   if ('artistId' in newTrack) {
-    if (newTrack.artistId !== null && !checkIsValidArtist(newTrack.artistId)) {
+    if (newTrack.artistId != null && !checkIsValidArtist(newTrack.artistId)) {
       throw new NotFoundException('Artist not found');
     }
     track.artistId = newTrack.artistId;
