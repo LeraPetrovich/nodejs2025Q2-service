@@ -23,8 +23,9 @@ export class AppController {
 
   @Get()
   @HttpCode(200)
-  async getUsers(): Promise<User[]> {
-    return await this.appService.getUsers();
+  async getUsers(): Promise<Omit<User, 'password'>[]> {
+    const users = await this.appService.getUsers();
+    return users.map(sanitizeUser);
   }
 
   @Get(':id')
@@ -42,42 +43,47 @@ export class AppController {
 
     return user;
   }
+
+  @Post()
+  @HttpCode(201)
+  async createNewUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<Omit<User, 'password'>> {
+    const user = await this.appService.createUser(createUserDto);
+    return sanitizeUser(user);
+  }
+
+  @Put(':id')
+  @HttpCode(200)
+  async updateUserPassword(
+    @Param('id') id: string,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ): Promise<Omit<User, 'password'>> {
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid UUID');
+    }
+    const user = await this.appService.updateUserPassword(
+      { id },
+      updatePasswordDto,
+    );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return sanitizeUser(user);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteUser(@Param('id') id: string): Promise<void> {
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid UUID');
+    }
+
+    const user = await this.appService.deleteUser({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  }
 }
-
-// @Post()
-// @HttpCode(201)
-// createNewUser(@Body() createUserDto: CreateUserDto): Omit<User, 'password'> {
-//   const user = this.appService.createUser(createUserDto);
-//   return sanitizeUser(user);
-// }
-
-// @Put(':id')
-// @HttpCode(200)
-// updateUserPassword(
-//   @Param('id') id: string,
-//   @Body() updatePasswordDto: UpdatePasswordDto,
-// ): Omit<User, 'password'> {
-//   if (!isUUID(id)) {
-//     throw new BadRequestException('Invalid UUID');
-//   }
-//   const user = this.appService.updateUserPassword(id, updatePasswordDto);
-
-//   if (!user) {
-//     throw new NotFoundException('User not found');
-//   }
-
-//   return sanitizeUser(user);
-// }
-
-// @Delete(':id')
-// @HttpCode(204)
-// deleteUser(@Param('id') id: string) {
-//   if (!isUUID(id)) {
-//     throw new BadRequestException('Invalid UUID');
-//   }
-
-//   const user = this.appService.deleteUser(id);
-//   if (!user) {
-//     throw new NotFoundException('User not found');
-//   }
-// }

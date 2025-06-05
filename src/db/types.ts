@@ -1,12 +1,3 @@
-interface User {
-  id: string;
-  login: string;
-  password: string;
-  version: number;
-  createdAt: number;
-  updatedAt: number;
-}
-
 interface Artist {
   id: string;
   name: string;
@@ -40,4 +31,4 @@ interface FavoritesResponse {
   tracks: Track[];
 }
 
-export type { User, Artist, Track, Album, Favorites, FavoritesResponse };
+export type { Artist, Track, Album, Favorites, FavoritesResponse };

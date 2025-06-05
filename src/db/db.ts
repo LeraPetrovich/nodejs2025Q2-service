@@ -1,6 +1,4 @@
-import { User, Track, Artist, Album, Favorites } from './types';
-
-export const users: User[] = [];
+import { Track, Artist, Album, Favorites } from './types';
 export const tracks: Track[] = [
   {
     id: 'c569ae1a-7152-4c4d-8228-b84c1d0df816',
