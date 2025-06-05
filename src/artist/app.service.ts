@@ -1,41 +1,78 @@
 import { Injectable } from '@nestjs/common';
-import type { Artist } from 'src/db/types';
-import { artists } from 'src/db/db';
 import { CreateArtistTo } from 'src/validate/CreateNewArtist';
 import { v4 as uuidv4 } from 'uuid';
-import { deleteArtistUtils } from './utils/deleteArtist';
+import { PrismaService } from 'src/prisma.service';
+import type { Prisma, Artist } from '@prisma/client';
 @Injectable()
 export class AppService {
-  getArtists(): Artist[] {
-    return artists;
+  constructor(private prisma: PrismaService) {}
+
+  async getArtists(): Promise<Artist[]> {
+    return this.prisma.artist.findMany();
   }
-  getArtist(id: string): Artist {
-    return artists.find((item) => item.id === id);
+  async getArtist(id: Prisma.ArtistWhereUniqueInput): Promise<Artist | null> {
+    return this.prisma.artist.findUnique({ where: id });
   }
-  createArtist(artist: CreateArtistTo) {
+  async createArtist(artist: CreateArtistTo): Promise<Artist> {
     const id = uuidv4();
-    const newArtist = {
+    const newArtistData: Prisma.ArtistUncheckedCreateInput = {
       id,
       grammy: artist.grammy,
       name: artist.name,
     };
-    artists.push(newArtist);
+    const newArtist = this.prisma.artist.create({ data: newArtistData });
     return newArtist;
   }
-  updateArtist(id: string, artistBody: CreateArtistTo) {
-    const artist = artists.find((item) => item.id === id);
+  async updateArtist(
+    id: Prisma.ArtistWhereUniqueInput,
+    artistBody: CreateArtistTo,
+  ) {
+    const artist = await this.prisma.artist.findUnique({ where: id });
     if (!artist) {
-      return;
+      return null;
     }
-    if ('name' in artistBody) {
-      artist.name = artistBody.name;
-    }
-    if ('grammy' in artistBody) {
-      artist.grammy = artistBody.grammy;
-    }
-    return artist;
+    return this.prisma.artist.update({
+      where: id,
+      data: {
+        ...(artistBody.name !== undefined && { name: artistBody.name }),
+        ...(artistBody.grammy !== undefined && { grammy: artistBody.grammy }),
+      },
+    });
   }
-  deleteArtist(id: string) {
-    return deleteArtistUtils(id);
+  async deleteArtist(id: string): Promise<Artist | null> {
+    const artist = await this.prisma.artist.findUnique({ where: { id } });
+    if (!artist) {
+      return null;
+    }
+
+    await this.prisma.track.updateMany({
+      where: { artistId: id },
+      data: { artistId: null },
+    });
+
+    await this.prisma.album.updateMany({
+      where: { artistId: id },
+      data: { artistId: null },
+    });
+
+    const tracks = await this.prisma.track.findMany();
+    console.log(tracks);
+
+    const favoritesUpdate = await this.prisma.favorites.findMany({
+      where: { artists: { has: id } },
+    });
+
+    await Promise.all(
+      favoritesUpdate.map((fav) =>
+        this.prisma.favorites.update({
+          where: { id: fav.id },
+          data: {
+            artists: fav.artists.filter((artistId) => artistId !== id),
+          },
+        }),
+      ),
+    );
+
+    return this.prisma.artist.delete({ where: { id } });
   }
 }
