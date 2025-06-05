@@ -4,11 +4,15 @@ import { Injectable } from '@nestjs/common';
 import { CreateTrack } from 'src/validate/CreateTrack';
 
 import { PrismaService } from 'src/prisma.service';
+import { FavoritesService } from 'src/favorite/app.service';
 import type { Prisma, Track } from '@prisma/client';
 
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private favorite: FavoritesService,
+  ) {}
 
   //GET
   async getTracks(): Promise<Track[]> {
@@ -107,20 +111,12 @@ export class AppService {
       return null;
     }
 
-    const favoritesUpdate = await this.prisma.favorites.findMany({
-      where: { tracks: { has: id } },
-    });
+    const favorites = await this.prisma.favorites.findFirst();
 
-    await Promise.all(
-      favoritesUpdate.map((fav) =>
-        this.prisma.favorites.update({
-          where: { id: fav.id },
-          data: {
-            tracks: fav.tracks.filter((trackId) => trackId !== id),
-          },
-        }),
-      ),
-    );
+    if (favorites && favorites.tracks.includes(id)) {
+      console.log("test")
+      await this.favorite.deleteFavTrack(id);
+    }
 
     return this.prisma.track.delete({ where: { id } });
   }

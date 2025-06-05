@@ -19,16 +19,10 @@ interface Album {
   artistId: string | null;
 }
 
-interface Favorites {
-  artists: string[];
-  albums: string[];
-  tracks: string[];
-}
-
 interface FavoritesResponse {
   artists: Artist[];
   albums: Album[];
   tracks: Track[];
 }
 
-export type { Artist, Track, Album, Favorites, FavoritesResponse };
+export type { FavoritesResponse };

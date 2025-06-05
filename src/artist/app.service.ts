@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateArtistTo } from 'src/validate/CreateNewArtist';
 import { v4 as uuidv4 } from 'uuid';
+
+import { FavoritesService } from 'src/favorite/app.service';
 import { PrismaService } from 'src/prisma.service';
 import type { Prisma, Artist } from '@prisma/client';
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private favorite: FavoritesService,
+  ) {}
 
   //GET
   async getArtists(): Promise<Artist[]> {
@@ -64,20 +69,11 @@ export class AppService {
       data: { artistId: null },
     });
 
-    const favoritesUpdate = await this.prisma.favorites.findMany({
-      where: { artists: { has: id } },
-    });
+    const favorites = await this.prisma.favorites.findFirst();
 
-    await Promise.all(
-      favoritesUpdate.map((fav) =>
-        this.prisma.favorites.update({
-          where: { id: fav.id },
-          data: {
-            artists: fav.artists.filter((artistId) => artistId !== id),
-          },
-        }),
-      ),
-    );
+    if (favorites && favorites.artists.includes(id)) {
+      await this.favorite.deleteFavArtist(id);
+    }
 
     return this.prisma.artist.delete({ where: { id } });
   }

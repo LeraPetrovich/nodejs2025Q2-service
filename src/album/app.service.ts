@@ -3,12 +3,16 @@ import { CreateNewAlbumTo } from 'src/validate/CreateNewAlbum';
 import { NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 
+import { FavoritesService } from 'src/favorite/app.service';
 import { PrismaService } from 'src/prisma.service';
 import type { Prisma, Album } from '@prisma/client';
 
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly favoritesService: FavoritesService,
+  ) {}
 
   //GET
   async getAlbums(): Promise<Album[]> {
@@ -88,21 +92,11 @@ export class AppService {
       data: { albumId: null },
     });
 
-    const favoritesUpdate = await this.prisma.favorites.findMany({
-      where: { albums: { has: id } },
-    });
+    const favorites = await this.prisma.favorites.findFirst();
 
-    await Promise.all(
-      favoritesUpdate.map((fav) =>
-        this.prisma.favorites.update({
-          where: { id: fav.id },
-          data: {
-            albums: fav.albums.filter((albumId) => albumId !== id),
-          },
-        }),
-      ),
-    );
-
+    if (favorites && favorites.albums.includes(id)) {
+      await this.favoritesService.deleteFavAlbum(id);
+    }
     return this.prisma.album.delete({ where: { id } });
   }
 }
