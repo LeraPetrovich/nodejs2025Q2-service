@@ -64,9 +64,6 @@ export class AppService {
       data: { artistId: null },
     });
 
-    const tracks = await this.prisma.track.findMany();
-    console.log(tracks);
-
     const favoritesUpdate = await this.prisma.favorites.findMany({
       where: { artists: { has: id } },
     });
