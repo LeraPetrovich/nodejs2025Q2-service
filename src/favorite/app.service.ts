@@ -88,14 +88,11 @@ export class FavoritesService {
       where: { id },
     });
 
-    console.log(currentTrack);
-
     if (!currentTrack) {
       throw new UnprocessableEntityException('Track not found');
     }
 
     const favorites = await this.prisma.favorites.findFirst();
-    console.log(favorites);
 
     if (!favorites) {
       throw new UnprocessableEntityException('Favorites record not found');

@@ -114,7 +114,6 @@ export class AppService {
     const favorites = await this.prisma.favorites.findFirst();
 
     if (favorites && favorites.tracks.includes(id)) {
-      console.log("test")
       await this.favorite.deleteFavTrack(id);
     }
 
