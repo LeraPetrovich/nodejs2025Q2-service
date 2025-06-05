@@ -7,12 +7,17 @@ import type { Prisma, Artist } from '@prisma/client';
 export class AppService {
   constructor(private prisma: PrismaService) {}
 
+  //GET
   async getArtists(): Promise<Artist[]> {
     return this.prisma.artist.findMany();
   }
+
+  //GET:id
   async getArtist(id: Prisma.ArtistWhereUniqueInput): Promise<Artist | null> {
     return this.prisma.artist.findUnique({ where: id });
   }
+
+  //POST
   async createArtist(artist: CreateArtistTo): Promise<Artist> {
     const id = uuidv4();
     const newArtistData: Prisma.ArtistUncheckedCreateInput = {
@@ -23,6 +28,8 @@ export class AppService {
     const newArtist = this.prisma.artist.create({ data: newArtistData });
     return newArtist;
   }
+
+  //PUT
   async updateArtist(
     id: Prisma.ArtistWhereUniqueInput,
     artistBody: CreateArtistTo,
@@ -39,6 +46,8 @@ export class AppService {
       },
     });
   }
+
+  //DELETE
   async deleteArtist(id: string): Promise<Artist | null> {
     const artist = await this.prisma.artist.findUnique({ where: { id } });
     if (!artist) {
