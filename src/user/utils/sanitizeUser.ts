@@ -6,7 +6,7 @@ export const sanitizeUser = (
   createdAt: number;
   updatedAt: number;
 } => {
-  const { password, createdAt, updatedAt, ...rest } = user;
+  const { createdAt, updatedAt, ...rest } = user;
 
   const sanitized = {
     ...rest,
