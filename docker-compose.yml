@@ -4,11 +4,11 @@ services:
     restart: always
     container_name: rs_school_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 24082017
-      POSTGRES_DB: rs-school-nest
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - '5433:5432'
+      - '${BD_EXTERNAL_PORT}:${BD_INNER_PORT}'
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -19,12 +19,12 @@ services:
     container_name: rs_school_app
     restart: always
     ports:
-      - '4000:4000'
+      - '${REST_PORT}:${REST_PORT}'
     depends_on:
       - db
     environment:
-      DATABASE_URL: "postgresql://postgres:24082017@db:5432/rs-school-nest?schema=public"
-      REST_PORT: 4000
+      DATABASE_URL: ${DATABASE_URL}
+      REST_PORT: ${REST_PORT}
     networks:
       - rs-network
 

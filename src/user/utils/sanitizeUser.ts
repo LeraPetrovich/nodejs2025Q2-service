@@ -8,6 +8,7 @@ export const sanitizeUser = (
 } => {
   const { createdAt, updatedAt, ...rest } = user;
 
+  delete rest.password;
   const sanitized = {
     ...rest,
     createdAt: createdAt.getTime(),
