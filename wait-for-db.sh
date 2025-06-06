@@ -10,7 +10,7 @@ npx prisma migrate deploy
 
 echo "Seeding favs if needed..."
 
-npm run seed
+npm run seed:prod
 
 echo "Starting app in production mode..."
 npm run start:prod
