@@ -18,7 +18,7 @@ model User {
   login     String
   password  String
   version   Int
-  createdAt DateTime @updatedAt
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 

@@ -23,14 +23,18 @@ export class AppController {
 
   @Get()
   @HttpCode(200)
-  async getUsers(): Promise<Omit<User, 'password'>[]> {
+  async getUsers(): Promise<
+    Omit<User, 'password' | 'createdAt' | 'updatedAt'>[]
+  > {
     const users = await this.appService.getUsers();
     return users.map(sanitizeUser);
   }
 
   @Get(':id')
   @HttpCode(200)
-  async getUser(@Param('id') id: string): Promise<User> {
+  async getUser(
+    @Param('id') id: string,
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
@@ -41,14 +45,14 @@ export class AppController {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    return sanitizeUser(user);
   }
 
   @Post()
   @HttpCode(201)
   async createNewUser(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
     const user = await this.appService.createUser(createUserDto);
     return sanitizeUser(user);
   }
@@ -58,7 +62,7 @@ export class AppController {
   async updateUserPassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
@@ -70,8 +74,8 @@ export class AppController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    return sanitizeUser(user);
+    const res = sanitizeUser(user);
+    return res;
   }
 
   @Delete(':id')

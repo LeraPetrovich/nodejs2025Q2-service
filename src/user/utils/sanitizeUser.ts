@@ -1,6 +1,18 @@
 import type { User } from '@prisma/client';
 
-export const sanitizeUser = (user: User): Omit<User, 'password'> => {
-  const { password, ...rest } = user;
-  return rest;
+export const sanitizeUser = (
+  user: User,
+): Omit<User, 'password' | 'createdAt' | 'updatedAt'> & {
+  createdAt: number;
+  updatedAt: number;
+} => {
+  const { password, createdAt, updatedAt, ...rest } = user;
+
+  const sanitized = {
+    ...rest,
+    createdAt: createdAt.getTime(),
+    updatedAt: updatedAt.getTime(),
+  };
+
+  return sanitized;
 };
