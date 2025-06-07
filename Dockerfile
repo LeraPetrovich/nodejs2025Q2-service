@@ -14,6 +14,8 @@ RUN npx prisma generate
 
 RUN npm run build
 
+RUN npm run audit --audit-level=critical || true
+
 EXPOSE 4000
 
 COPY wait-for-db.sh /app/wait-for-db.sh
