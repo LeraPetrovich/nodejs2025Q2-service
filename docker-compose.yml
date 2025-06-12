@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    container_name: rs_school_db_2
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - '${BD_EXTERNAL_PORT}:${BD_INNER_PORT}'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - rs-network
+      
+  app:
+    build: .
+    container_name: rs_school_app_2
+    restart: always
+    ports:
+      - '${REST_PORT}:${REST_PORT}'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REST_PORT: ${REST_PORT}
+    networks:
+      - rs-network
+
+volumes:
+  pgdata:
+
+networks:
+  rs-network:
+    driver: bridge

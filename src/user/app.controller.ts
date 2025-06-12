@@ -11,10 +11,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import type { User } from 'src/db/types';
+import type { User } from '@prisma/client';
 import { CreateUserDto } from 'src/validate/CreateUserDto';
 import { UpdatePasswordDto } from 'src/validate/UpdatePasswordDto';
 import { validate as isUUID } from 'uuid';
+import { sanitizeUser } from './utils/sanitizeUser';
 
 @Controller('user')
 export class AppController {
@@ -22,55 +23,69 @@ export class AppController {
 
   @Get()
   @HttpCode(200)
-  getUsers(): Array<User> {
-    return this.appService.getUsers();
+  async getUsers(): Promise<
+    Omit<User, 'password' | 'createdAt' | 'updatedAt'>[]
+  > {
+    const users = await this.appService.getUsers();
+    return users.map(sanitizeUser);
   }
 
   @Get(':id')
   @HttpCode(200)
-  getUser(@Param('id') id: string): User {
+  async getUser(
+    @Param('id') id: string,
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
-    const user = this.appService.getUser(id);
+
+    const user = await this.appService.getUser({ id });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+
+    return sanitizeUser(user);
   }
 
   @Post()
   @HttpCode(201)
-  createNewUser(@Body() createUserDto: CreateUserDto): User {
-    return this.appService.createUser(createUserDto);
+  async createNewUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
+    const user = await this.appService.createUser(createUserDto);
+    return sanitizeUser(user);
   }
 
   @Put(':id')
   @HttpCode(200)
-  updateUserPassword(
+  async updateUserPassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): User {
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
-    const user = this.appService.updateUserPassword(id, updatePasswordDto);
+    const user = await this.appService.updateUserPassword(
+      { id },
+      updatePasswordDto,
+    );
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    return user;
+    const res = sanitizeUser(user);
+    return res;
   }
 
   @Delete(':id')
   @HttpCode(204)
-  deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id') id: string): Promise<void> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
 
-    const user = this.appService.deleteUser(id);
+    const user = await this.appService.deleteUser({ id });
     if (!user) {
       throw new NotFoundException('User not found');
     }

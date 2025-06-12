@@ -11,9 +11,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import type { Artist } from 'src/db/types';
 import { CreateArtistTo } from 'src/validate/CreateNewArtist';
 import { validate as isUUID } from 'uuid';
+import type { Artist } from '@prisma/client';
 
 @Controller('artist')
 export class AppController {
@@ -21,17 +21,17 @@ export class AppController {
 
   @Get()
   @HttpCode(200)
-  getArtists(): Artist[] {
-    return this.appService.getArtists();
+  async getArtists(): Promise<Artist[]> {
+    return await this.appService.getArtists();
   }
 
   @Get(':id')
   @HttpCode(200)
-  getArtist(@Param('id') id: string): Artist {
+  async getArtist(@Param('id') id: string): Promise<Artist> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
-    const artist = this.appService.getArtist(id);
+    const artist = await this.appService.getArtist({ id });
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
@@ -40,20 +40,22 @@ export class AppController {
 
   @Post()
   @HttpCode(201)
-  createNewArtist(@Body() createArtistTo: CreateArtistTo): Artist {
-    return this.appService.createArtist(createArtistTo);
+  async createNewArtist(
+    @Body() createArtistTo: CreateArtistTo,
+  ): Promise<Artist> {
+    return await this.appService.createArtist(createArtistTo);
   }
 
   @Put(':id')
   @HttpCode(200)
-  updateArtist(
+  async updateArtist(
     @Param('id') id: string,
     @Body() createArtistTo: CreateArtistTo,
-  ): Artist {
+  ): Promise<Artist> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
-    const artist = this.appService.updateArtist(id, createArtistTo);
+    const artist = await this.appService.updateArtist({ id }, createArtistTo);
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
@@ -64,12 +66,12 @@ export class AppController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteArtist(@Param('id') id: string) {
+  async deleteArtist(@Param('id') id: string): Promise<void> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
 
-    const artist = this.appService.deleteArtist(id);
+    const artist = await this.appService.deleteArtist(id);
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }

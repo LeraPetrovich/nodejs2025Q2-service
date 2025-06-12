@@ -1,55 +1,72 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import type { User } from 'src/db/types';
 import { CreateUserDto } from 'src/validate/CreateUserDto';
 import { UpdatePasswordDto } from 'src/validate/UpdatePasswordDto';
-import { users } from 'src/db/db';
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from 'src/prisma.service';
+import type { User, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AppService {
-  getUsers(): Array<User> {
-    return users;
+  constructor(private prisma: PrismaService) {}
+
+  async getUsers(): Promise<User[]> {
+    return this.prisma.user.findMany();
   }
-  getUser(id: string): User {
-    return users.find((item) => item.id === id);
+  async getUser(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  ): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: userWhereUniqueInput,
+    });
   }
-  createUser(credential: CreateUserDto) {
-    const id = uuidv4();
-    const date = new Date();
-    const newUser = {
-      id,
+
+  async createUser(credential: CreateUserDto): Promise<User> {
+    const newUser: Prisma.UserUncheckedCreateInput = {
+      id: uuidv4(),
       login: credential.login,
       password: credential.password,
-      version: 0,
-      createdAt: date.getTime(),
-      updatedAt: date.getTime(),
+      version: 1,
     };
-    users.push(newUser);
-    return newUser;
+
+    return this.prisma.user.create({ data: newUser });
   }
 
-  updateUserPassword(id: string, updatePasswordDto: UpdatePasswordDto): User {
-    const user = users.find((item) => item.id === id);
+  async updateUserPassword(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: userWhereUniqueInput,
+    });
 
     if (!user) {
-      return;
+      return null;
     }
     const { oldPassword, newPassword } = updatePasswordDto;
+
     if (oldPassword !== user.password) {
       throw new ForbiddenException('Invalid old password');
     }
-    user.password = newPassword;
-    user.version += 1;
-    user.updatedAt = Date.now();
-    return user;
+
+    const updateUser = await this.prisma.user.update({
+      where: userWhereUniqueInput,
+      data: {
+        password: newPassword,
+        version: user.version + 1,
+      },
+    });
+    return updateUser;
   }
 
-  deleteUser(id: string): User {
-    const index = users.findIndex((item) => item.id === id);
-    if (index === -1) {
-      return;
+  async deleteUser(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  ): Promise<User | null> {
+    try {
+      return await this.prisma.user.delete({
+        where: userWhereUniqueInput,
+      });
+    } catch {
+      return null;
     }
-    const [deletedUser] = users.splice(index, 1);
-    return deletedUser;
   }
 }

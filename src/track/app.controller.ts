@@ -13,7 +13,7 @@ import {
 import { AppService } from './app.service';
 import { validate as isUUID } from 'uuid';
 
-import type { Track } from 'src/db/types';
+import type { Track } from '@prisma/client';
 import { CreateTrack } from 'src/validate/CreateTrack';
 
 @Controller('track')
@@ -22,17 +22,17 @@ export class AppController {
 
   @Get()
   @HttpCode(200)
-  getTracks(): Array<Track> {
-    return this.appService.getTracks();
+  async getTracks(): Promise<Track[]> {
+    return await this.appService.getTracks();
   }
 
   @Get(':id')
   @HttpCode(200)
-  getTrack(@Param('id') id: string): Track {
+  async getTrack(@Param('id') id: string): Promise<Track> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
-    const track = this.appService.getTrack(id);
+    const track = await this.appService.getTrack({ id });
     if (!track) {
       throw new NotFoundException('Track not found');
     }
@@ -41,20 +41,20 @@ export class AppController {
 
   @Post()
   @HttpCode(201)
-  createNewTrack(@Body() createTrackTo: CreateTrack): Track {
-    return this.appService.createTrack(createTrackTo);
+  async createNewTrack(@Body() createTrackTo: CreateTrack): Promise<Track> {
+    return await this.appService.createTrack(createTrackTo);
   }
 
   @Put(':id')
   @HttpCode(200)
-  updateTrack(
+  async updateTrack(
     @Param('id') id: string,
     @Body() createTrackTo: CreateTrack,
-  ): Track {
+  ): Promise<Track> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
-    const track = this.appService.updateTrack(id, createTrackTo);
+    const track = await this.appService.updateTrack({ id }, createTrackTo);
 
     if (!track) {
       throw new NotFoundException('Track not found');
@@ -65,12 +65,12 @@ export class AppController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteTrack(@Param('id') id: string) {
+  async deleteTrack(@Param('id') id: string): Promise<void> {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid UUID');
     }
 
-    const track = this.appService.deleteTrack(id);
+    const track = await this.appService.deleteTrack(id);
     if (!track) {
       throw new NotFoundException('Track not found');
     }
