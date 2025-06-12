@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:16
     restart: always
-    container_name: rs_school_db
+    container_name: rs_school_db_2
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -16,7 +16,7 @@ services:
       
   app:
     build: .
-    container_name: rs_school_app
+    container_name: rs_school_app_2
     restart: always
     ports:
       - '${REST_PORT}:${REST_PORT}'
